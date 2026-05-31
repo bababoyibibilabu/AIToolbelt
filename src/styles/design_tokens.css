@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+
+:root {
+  /* Color Palette using OKLCH for premium high-fidelity colors */
+  --bg-space: oklch(14% 0.015 240);       /* Deep space black */
+  --bg-card: oklch(18% 0.02 240);        /* Deep card background */
+  --bg-card-hover: oklch(22% 0.03 240);  /* Card hover background */
+  --bg-sidebar: oklch(16% 0.018 240);    /* Sidebar dark background */
+  --bg-input: oklch(12% 0.015 240);      /* Sleek dark input background */
+
+  /* Neon/Digital Accents */
+  --color-primary: oklch(75% 0.18 200);   /* Neon Teal / Aurora Green */
+  --color-primary-glow: oklch(75% 0.18 200 / 0.15);
+  --color-secondary: oklch(65% 0.25 290); /* Electric Violet */
+  --color-secondary-glow: oklch(65% 0.25 290 / 0.15);
+  
+  /* Text Neutrals (strictly verified contrast) */
+  --text-high: oklch(98% 0.005 240);     /* Almost pure white */
+  --text-medium: oklch(85% 0.01 240);     /* Muted white/light gray */
+  --text-muted: oklch(60% 0.015 240);     /* Muted gray */
+  --text-dark: oklch(30% 0.01 240);      /* Very dark gray */
+
+  /* Category colors */
+  --color-cat-skill: oklch(75% 0.15 150);   /* Soft Emerald */
+  --color-cat-mcp: oklch(72% 0.18 240);     /* Ocean Cyan */
+  --color-cat-prompt: oklch(70% 0.16 30);   /* Soft Amber */
+  --color-cat-tool: oklch(75% 0.14 340);    /* Pink Rose */
+
+  /* Borders & Shadows */
+  --border-subtle: oklch(22% 0.015 240 / 0.8);  /* Subtle dark gray border */
+  --border-focus: oklch(70% 0.15 240);          /* Focus outline tint */
+  --shadow-premium: 0 8px 32px 0 oklch(10% 0.01 240 / 0.5);
+  --shadow-glow-violet: 0 0 20px 0 oklch(65% 0.25 290 / 0.15);
+  --shadow-glow-teal: 0 0 20px 0 oklch(75% 0.18 200 / 0.15);
+
+  /* Layout, Spacing & Grids (8px modular scale) */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Typography Scale */
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Fira Code', source-code-pro, Menlo, Monaco, Consolas, monospace;
+
+  --text-size-2xs: 10px;
+  --text-size-xs: 12px;
+  --text-size-sm: 14px;
+  --text-size-md: 16px;
+  --text-size-lg: 18px;
+  --text-size-xl: 24px;
+  --text-size-2xl: 32px;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-space);
+  color: var(--text-medium);
+  overflow-x: hidden;
+}
+
+/* Glassmorphism panel base utility */
+.glass-panel {
+  background: rgba(30, 30, 35, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-space);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(25% 0.015 240);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(35% 0.02 240);
+}

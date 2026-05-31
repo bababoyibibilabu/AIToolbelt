@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIToolbelt - 控制台</title>
+  <link rel="stylesheet" href="src/styles/design_tokens.css">
+  <link rel="stylesheet" href="src/dashboard/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-app">
+    <!-- Sidebar -->
+    <aside class="app-sidebar glass-panel">
+      <div class="sidebar-header">
+        <span class="logo-icon" id="logo-hamster-main" style="display: inline-block;">🐹</span>
+        <h1 class="logo-title">AIToolbelt</h1>
+      </div>
+
+      <div class="sidebar-search">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="全局检索标题、描述或标签...">
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">分类过滤</div>
+        <ul class="nav-list">
+          <li class="nav-item active" data-filter="all">
+            <span class="nav-item-icon">📁</span>
+            <span class="nav-item-name">全部收藏</span>
+            <span class="nav-item-count" id="count-all">0</span>
+          </li>
+          <li class="nav-item" data-filter="skill">
+            <span class="nav-item-icon" style="color: var(--color-cat-skill)">🟢</span>
+            <span class="nav-item-name">Skill (AI技能/技能文件)</span>
+            <span class="nav-item-count" id="count-skill">0</span>
+          </li>
+          <li class="nav-item" data-filter="mcp">
+            <span class="nav-item-icon" style="color: var(--color-cat-mcp)">🔵</span>
+            <span class="nav-item-name">MCP Server (服务配置)</span>
+            <span class="nav-item-count" id="count-mcp">0</span>
+          </li>
+          <li class="nav-item" data-filter="prompt">
+            <span class="nav-item-icon" style="color: var(--color-cat-prompt)">🟡</span>
+            <span class="nav-item-name">Prompt (提示词)</span>
+            <span class="nav-item-count" id="count-prompt">0</span>
+          </li>
+          <li class="nav-item" data-filter="tool">
+            <span class="nav-item-icon" style="color: var(--color-cat-tool)">🔴</span>
+            <span class="nav-item-name">AI Tool & Product (产品工具)</span>
+            <span class="nav-item-count" id="count-tool">0</span>
+          </li>
+        </ul>
+
+        <div class="nav-section-title">我的标签</div>
+        <div class="tags-filter-container" id="sidebar-tags">
+          <!-- Dynamically generated tags list will be inserted here -->
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="btn-settings-toggle" class="settings-btn">
+          <span class="settings-icon">⚙️</span>
+          <span>同步与设置</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+      <header class="content-header">
+        <div class="header-info">
+          <h2 id="current-filter-title">全部收藏</h2>
+          <p id="filter-description">显示您收藏的所有 AI 资源卡片。</p>
+        </div>
+        
+        <div class="header-actions">
+          <!-- Sync Status Status Indicator -->
+          <div class="sync-status-box" id="dashboard-sync-indicator">
+            <span class="status-indicator-dot offline"></span>
+            <span class="status-indicator-text">未登录云同步</span>
+          </div>
+
+          <button id="btn-sync" class="action-btn secondary-btn" title="双向同步数据">
+            <span class="btn-icon spin-target">🔄</span>
+            <span>立即同步</span>
+          </button>
+          
+          <button id="btn-add-bookmark" class="action-btn primary-btn">
+            <span class="btn-icon">➕</span>
+            <span>添加收藏项</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Grid Cards Container -->
+      <section class="cards-grid" id="cards-container">
+        <!-- Cards will be populated here by JavaScript -->
+        <div class="empty-state" id="empty-state-view">
+          <div class="empty-icon" id="hamster-empty-logo" style="display: inline-block; font-size: 64px;">🐹</div>
+          <h3>仓鼠的 AI 粮仓空空如也</h3>
+          <p>快去网页或信息流中帮仓鼠囤一些 AI 粮食（Skill, MCP, Prompts, Tools）吧！</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Create / Edit Modal -->
+  <div class="modal-overlay hidden" id="modal-bookmark">
+    <div class="modal-card glass-panel animate-modal">
+      <div class="modal-header">
+        <h3 id="modal-title-text">添加 AI 收藏</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-bookmark">
+          <input type="hidden" id="edit-id">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="edit-title">标题 <span class="required">*</span></label>
+              <input type="text" id="edit-title" required placeholder="例如：Claude Code System Instructions">
+            </div>
+            <div class="form-group flex-1">
+              <label for="edit-category">所属分类</label>
+              <select id="edit-category">
+                <option value="skill">Skill (AI技能)</option>
+                <option value="mcp">MCP Server (配置/代码)</option>
+                <option value="prompt">Prompt (提示词)</option>
+                <option value="tool" selected>AI Tool & Product (工具产品)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-url">来源链接 (URL)</label>
+            <input type="url" id="edit-url" placeholder="https://...">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-description">详细描述 / 提示词内容 / MCP 配置文件</label>
+            <textarea id="edit-description" rows="8" placeholder="在这里输入或粘贴详细内容..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>标签 (多选)</label>
+            <div class="modal-tags-container" id="modal-tags-list">
+              <!-- Dynamically populated tags with checkboxes -->
+            </div>
+            <div class="add-tag-wrapper" style="margin-top: var(--space-xs);">
+              <input type="text" id="edit-new-tag" placeholder="新建标签...">
+              <button type="button" id="btn-modal-add-tag" class="btn btn-secondary">创建</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-cancel">取消</button>
+        <button type="submit" form="form-bookmark" class="btn btn-primary">保存收藏</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings / Sync Modal -->
+  <div class="modal-overlay hidden" id="modal-settings">
+    <div class="modal-card glass-panel animate-modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>同步与系统设置</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Private DB Settings -->
+        <div class="settings-section">
+          <h4>1. 数据库私有化配置 (Supabase)</h4>
+          <p class="settings-help">如果您希望数据完全属于自己并能跨设备同步，请输入您个人的免费 Supabase 项目凭证：</p>
+          <div class="form-group">
+            <label for="settings-db-url">Supabase Project URL</label>
+            <input type="url" id="settings-db-url" placeholder="https://your-project-ref.supabase.co">
+          </div>
+          <div class="form-group">
+            <label for="settings-db-key">Anon Key</label>
+            <input type="password" id="settings-db-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          </div>
+          <button id="btn-save-db" class="btn btn-secondary" style="width: auto; padding: 6px 16px; font-size: var(--text-size-xs);">保存配置</button>
+        </div>
+
+        <!-- Sync Account Login -->
+        <div class="settings-section" style="margin-top: var(--space-lg); border-top: 1px solid var(--border-subtle); padding-top: var(--space-md);">
+          <h4>2. 跨设备同步账号登录</h4>
+          <p class="settings-help">在两台电脑上登录同一个邮箱以双向同步数据。配置上述 Supabase 项目凭证后即可进行登录：</p>
+          
+          <div id="settings-auth-logged-out">
+            <div class="form-group">
+              <label for="settings-email">电子邮箱</label>
+              <input type="email" id="settings-email" placeholder="example@email.com">
+            </div>
+            
+            <div id="group-otp" class="form-group hidden">
+              <label for="settings-otp">邮箱验证码 (OTP)</label>
+              <input type="text" id="settings-otp" placeholder="输入邮箱收到的验证码" maxlength="10">
+            </div>
+
+            <div class="auth-buttons" style="display: flex; gap: var(--space-md); margin-top: var(--space-sm);">
+              <button id="btn-send-otp" class="btn btn-primary flex-1">发送验证码</button>
+              <button id="btn-verify-otp" class="btn btn-primary flex-1 hidden">验证登录</button>
+            </div>
+          </div>
+
+          <div id="settings-auth-logged-in" class="hidden">
+            <div class="auth-user-info">
+              <span>当前登录邮箱：</span>
+              <strong id="logged-in-email-display">user@example.com</strong>
+            </div>
+            <button id="btn-sign-out" class="btn btn-secondary" style="margin-top: var(--space-md); width: auto; padding: 6px 16px;">退出登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay for Syncing -->
+  <div class="loading-overlay hidden" id="sync-loader">
+    <div class="loader-content">
+      <div class="spinner"></div>
+      <p id="loader-text">数据云端双向同步中...</p>
+    </div>
+  </div>
+
+  <script type="module" src="src/dashboard/dashboard.js"></script>
+</body>
+</html>

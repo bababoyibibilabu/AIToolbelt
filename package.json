@@ -1,0 +1,19 @@
+{
+  "name": "aitoolbelt-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension to collect AI resources with custom tags and cross-device sync.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node build-scripts.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.8",
+    "gsap": "^3.12.5"
+  },
+  "devDependencies": {
+    "jimp": "^1.6.1",
+    "vite": "^5.1.6"
+  }
+}

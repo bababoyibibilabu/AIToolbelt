@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIToolbelt</title>
+  <link rel="stylesheet" href="../styles/design_tokens.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container glass-panel">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="logo">
+        <span class="logo-icon" id="logo-hamster" style="display: inline-block;">🐹</span>
+        <span class="logo-text">AIToolbelt</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-manual-toggle" title="手动新建收藏" class="icon-btn">➕</button>
+        <button id="btn-open-dashboard" title="打开数据控制台" class="icon-btn">📊</button>
+      </div>
+    </header>
+
+    <!-- Star Collection View -->
+    <main id="view-star" class="popup-main">
+      <div class="star-section">
+        <button id="btn-star" class="star-btn">
+          <svg viewBox="0 0 24 24" class="star-svg">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </button>
+        <div id="star-status" class="star-status">🐹 仓鼠肚子饿了 (未囤积此页)</div>
+      </div>
+
+      <div class="form-group slide-in-element">
+        <label class="form-label">所属分类</label>
+        <div class="category-chips">
+          <button class="chip" data-category="skill">Skill</button>
+          <button class="chip" data-category="mcp">MCP</button>
+          <button class="chip" data-category="prompt">Prompt</button>
+          <button class="chip" data-category="tool">Tool</button>
+        </div>
+      </div>
+
+      <div class="form-group slide-in-element">
+        <label class="form-label">标记标签</label>
+        <div id="quick-tags" class="tags-container">
+          <!-- Tags will be dynamically loaded here -->
+        </div>
+        <div class="add-tag-wrapper">
+          <input type="text" id="input-new-tag" placeholder="新建标签..." maxlength="15">
+          <button id="btn-add-tag">添加</button>
+        </div>
+      </div>
+      
+      <div class="status-footer" id="sync-indicator">
+        <span class="dot"></span> <span class="sync-text">本地离线存储已就绪</span>
+      </div>
+    </main>
+
+    <!-- Manual Form View -->
+    <main id="view-manual" class="popup-main hidden">
+      <div class="manual-form">
+        <div class="form-group">
+          <label class="form-label" for="manual-title">标题</label>
+          <input type="text" id="manual-title" class="form-input" placeholder="输入收藏名称">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="manual-url">网址 (URL)</label>
+          <input type="url" id="manual-url" class="form-input" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">所属分类</label>
+          <div class="category-chips manual-category">
+            <button class="chip" data-category="skill">Skill</button>
+            <button class="chip" data-category="mcp">MCP</button>
+            <button class="chip" data-category="prompt">Prompt</button>
+            <button class="chip" data-category="tool">Tool</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="manual-desc">详细描述 / 提示词</label>
+          <textarea id="manual-desc" class="form-textarea" rows="3" placeholder="添加说明或粘贴 Prompt..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">标签</label>
+          <div id="manual-tags" class="tags-container">
+            <!-- Dynamic tags -->
+          </div>
+        </div>
+        <div class="form-actions">
+          <button id="btn-manual-cancel" class="btn btn-secondary">取消</button>
+          <button id="btn-manual-save" class="btn btn-primary">保存收藏</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
