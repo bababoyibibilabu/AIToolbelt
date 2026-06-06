@@ -195,17 +195,10 @@ export async function syncBookmarks() {
     // 4. Bidirectional merge
     const remoteMap = new Map(remoteItems.map(item => [item.id, item]));
     
-    // Ensure all local items get user_id to correctly track remote deletions in subsequent syncs
-    const updatedLocalItems = localItems.map(local => {
-      if (!local.user_id) {
-        return { ...local, user_id: user.id };
-      }
-      return local;
-    });
-    const localMap = new Map(updatedLocalItems.map(item => [item.id, item]));
+    const localMap = new Map(localItems.map(item => [item.id, item]));
     const mergedMap = new Map();
     
-    updatedLocalItems.forEach(local => {
+    localItems.forEach(local => {
       // Force ignore if deleted locally
       if (deletedIdsSet.has(local.id)) {
         return;
@@ -245,8 +238,49 @@ export async function syncBookmarks() {
     
     const mergedItems = Array.from(mergedMap.values());
     
+    // 5. Identify which items need to be uploaded to Supabase
+    // (Items that are new or newer locally than remote)
+    const itemsToUpload = [];
+    
+    for (const merged of mergedItems) {
+      const remote = remoteMap.get(merged.id);
+      const localTime = new Date(merged.updated_at).getTime();
+      const remoteTime = remote ? new Date(remote.updated_at).getTime() : 0;
+      
+      if (!remote || localTime > remoteTime) {
+        itemsToUpload.push({
+          ...merged,
+          user_id: user.id
+        });
+      }
+    }
+    
+    // 6. Upload modifications to Supabase
+    const successfullyUploadedIds = new Set();
+    if (itemsToUpload.length > 0) {
+      const { error: upsertError } = await client
+        .from('bookmarks')
+        .upsert(itemsToUpload);
+        
+      if (upsertError) throw upsertError;
+      
+      // Only mark items as synced (assign user_id) after confirmed upload
+      itemsToUpload.forEach(item => successfullyUploadedIds.add(item.id));
+    }
+    
+    // Assign user_id only to items that were successfully uploaded,
+    // so unsynced items are not mistakenly treated as "deleted on remote" next time
+    const mergedItemsWithSyncState = mergedItems.map(item => {
+      if (successfullyUploadedIds.has(item.id) || (item.user_id && item.user_id === user.id && remoteMap.has(item.id))) {
+        return { ...item, user_id: user.id };
+      }
+      // Strip user_id from items that haven't been confirmed on remote yet
+      const { user_id, ...rest } = item;
+      return rest;
+    });
+    
     // Save merged result back to local storage
-    await saveLocalBookmarks(mergedItems);
+    await saveLocalBookmarks(mergedItemsWithSyncState);
     
     // Update deletedBookmarkIds in storage: keep only IDs that failed to delete (still in remoteMap)
     const remainingDeletedIds = [];
@@ -258,33 +292,6 @@ export async function syncBookmarks() {
     await new Promise((resolve) => {
       chrome.storage.local.set({ deletedBookmarkIds: remainingDeletedIds }, () => resolve());
     });
-    
-    // 5. Identify which items need to be uploaded to Supabase
-    // (Items that are new or newer locally than remote)
-    const itemsToUpload = [];
-    
-    for (const merged of mergedItems) {
-      const remote = remoteMap.get(merged.id);
-      const localTime = new Date(merged.updated_at).getTime();
-      const remoteTime = remote ? new Date(remote.updated_at).getTime() : 0;
-      
-      if (!remote || localTime > remoteTime) {
-        const { ...uploadItem } = merged;
-        itemsToUpload.push({
-          ...uploadItem,
-          user_id: user.id
-        });
-      }
-    }
-    
-    // 6. Upload modifications to Supabase
-    if (itemsToUpload.length > 0) {
-      const { error: upsertError } = await client
-        .from('bookmarks')
-        .upsert(itemsToUpload);
-        
-      if (upsertError) throw upsertError;
-    }
     
     // Also trigger custom tags sync/caching
     const allTags = new Set();
