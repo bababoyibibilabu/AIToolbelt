@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { getSupabaseConfig, getLocalBookmarks, saveLocalBookmarks } from './storage.js';
+import { getSupabaseConfig, getLocalBookmarks, saveLocalBookmarks, getCustomTags, saveCustomTags, DEFAULT_TAGS } from './storage.js';
 
 let supabaseInstance = null;
 let lastUsedConfigStr = '';
@@ -293,13 +293,38 @@ export async function syncBookmarks() {
       chrome.storage.local.set({ deletedBookmarkIds: remainingDeletedIds }, () => resolve());
     });
     
-    // Also trigger custom tags sync/caching
-    const allTags = new Set();
-    mergedItems.forEach(item => {
-      if (item.tags) item.tags.forEach(t => allTags.add(t));
+    // 7. Sync custom tags via Supabase user metadata
+    // Collect all tags used across merged bookmarks
+    const tagsFromBookmarks = new Set();
+    mergedItemsWithSyncState.forEach(item => {
+      if (item.tags) item.tags.forEach(t => tagsFromBookmarks.add(t));
     });
-    
-    return { success: true, count: mergedItems.length, uploaded: itemsToUpload.length };
+
+    // Merge with existing local custom tags
+    const localCustomTags = await getCustomTags();
+    const mergedCustomTags = new Set([...localCustomTags, ...tagsFromBookmarks]);
+    DEFAULT_TAGS.forEach(t => mergedCustomTags.delete(t)); // keep customTags clean
+
+    // Pull remote custom tags from user metadata
+    const { data: { user: userWithMeta } } = await client.auth.getUser();
+    const remoteTags = userWithMeta?.user_metadata?.custom_tags;
+    if (Array.isArray(remoteTags)) {
+      remoteTags.forEach(t => {
+        if (!DEFAULT_TAGS.includes(t)) mergedCustomTags.add(t);
+      });
+    }
+
+    const finalCustomTags = Array.from(mergedCustomTags);
+
+    // Save merged tags locally
+    await saveCustomTags(finalCustomTags);
+
+    // Push merged tags back to Supabase user metadata
+    await client.auth.updateUser({
+      data: { custom_tags: finalCustomTags }
+    });
+
+    return { success: true, count: mergedItemsWithSyncState.length, uploaded: itemsToUpload.length };
   } catch (err) {
     console.error('Bidirectional sync failed:', err);
     return { success: false, reason: 'error', error: err.message };

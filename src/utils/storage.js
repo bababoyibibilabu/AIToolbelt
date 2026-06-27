@@ -103,6 +103,29 @@ export async function getBookmarkByUrl(url) {
 }
 
 /**
+ * Get custom tags from local storage (excludes defaults)
+ * @returns {Promise<Array>} List of custom tag strings
+ */
+export async function getCustomTags() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get({ customTags: [] }, (result) => {
+      resolve(result.customTags || []);
+    });
+  });
+}
+
+/**
+ * Save custom tags to local storage (replaces existing list)
+ * @param {Array} tags List of custom tag strings
+ */
+export async function saveCustomTags(tags = []) {
+  const filtered = tags.filter(t => !DEFAULT_TAGS.includes(t));
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ customTags: filtered }, () => resolve());
+  });
+}
+
+/**
  * Get all tags (Default presets + custom tags)
  * @returns {Promise<Array>} List of tag strings
  */
