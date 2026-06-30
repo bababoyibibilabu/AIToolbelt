@@ -32,6 +32,9 @@ export async function getSupabaseClient() {
   initializationPromise = (async () => {
     try {
       const client = createClient(config.url, config.anonKey, {
+        realtime: {
+          params: { eventsPerSecond: 0 }
+        },
         auth: {
           persistSession: true,
           storageKey: 'ai_toolbelt_supabase_auth',
