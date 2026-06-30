@@ -11,6 +11,7 @@ let currentCategory = 'tool';
 // DOM elements
 const btnStar = document.getElementById('btn-star');
 const starStatus = document.getElementById('star-status');
+const inputTitle = document.getElementById('input-title');
 const containerQuickTags = document.getElementById('quick-tags');
 const inputNewTag = document.getElementById('input-new-tag');
 const btnAddTag = document.getElementById('btn-add-tag');
@@ -58,6 +59,7 @@ async function initPopup() {
       // Update Star Button visual state
       btnStar.classList.add('bookmarked');
       starStatus.textContent = '🐹 腮帮子鼓鼓 (已囤粮)';
+      showTitleInput(currentBookmark.title);
     }
   }
 
@@ -160,6 +162,7 @@ function setupEventListeners() {
       }
       btnStar.classList.remove('bookmarked');
       starStatus.textContent = '🐹 吐出了粮食 (取消收藏)';
+      hideTitleInput();
       
       // Minor deflation animation
       if (logoHamster) {
@@ -181,6 +184,7 @@ function setupEventListeners() {
       
       btnStar.classList.add('bookmarked');
       starStatus.textContent = '🐹 囤粮成功！腮帮子又鼓了！';
+      showTitleInput(currentBookmark.title);
       animateHamsterPuff();
     }
     triggerBackgroundSync();
@@ -280,6 +284,7 @@ function setupEventListeners() {
     currentBookmark = saved;
     btnStar.classList.add('bookmarked');
     starStatus.textContent = '🐹 手动囤粮成功！';
+    showTitleInput(saved.title);
     animateHamsterPuff();
     
     viewManual.classList.add('hidden');
@@ -303,6 +308,23 @@ function setupEventListeners() {
     chrome.tabs.create({ url: 'dashboard.html' });
     window.close(); // close popup window
   });
+
+  // Save title on blur or Enter key
+  if (inputTitle) {
+    inputTitle.addEventListener('blur', async () => {
+      if (!currentBookmark) return;
+      const newTitle = inputTitle.value.trim() || currentBookmark.title;
+      if (newTitle !== currentBookmark.title) {
+        currentBookmark.title = newTitle;
+        await saveBookmark(currentBookmark);
+        triggerBackgroundSync();
+      }
+    });
+
+    inputTitle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') inputTitle.blur();
+    });
+  }
 }
 
 // Send sync signal to background service worker to keep popup fast
@@ -313,4 +335,18 @@ function triggerBackgroundSync() {
       console.log('Background worker did not respond immediately, will retry in background.');
     }
   });
+}
+
+// Show the inline title input with the given value
+function showTitleInput(title) {
+  if (!inputTitle) return;
+  inputTitle.value = title || '';
+  inputTitle.classList.remove('hidden');
+}
+
+// Hide the inline title input
+function hideTitleInput() {
+  if (!inputTitle) return;
+  inputTitle.classList.add('hidden');
+  inputTitle.value = '';
 }

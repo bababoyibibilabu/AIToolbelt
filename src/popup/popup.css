@@ -334,6 +334,31 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Title inline edit */
+.title-input {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-high);
+  padding: 4px var(--space-sm);
+  font-size: var(--text-size-xs);
+  font-family: var(--font-sans);
+  outline: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: var(--transition-fast);
+  text-align: center;
+}
+.title-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-teal);
+  max-width: 100%;
+}
+
 /* Footer Indicator */
 .status-footer {
   margin-top: auto;
